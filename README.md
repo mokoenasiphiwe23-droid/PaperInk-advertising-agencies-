@@ -39,6 +39,8 @@ Run the test suite with:
 npm test
 ```
 
+See the [Campaign Performance Analytics and Exports guide](docs/analytics-and-exports.md) for API examples, metric definitions, validation rules, and export formats.
+
 ## Getting started
 
 The project is currently in its initial setup phase. Add implementation files under `src/`, tests under `tests/`, and supporting documentation under `docs/` as development begins.
