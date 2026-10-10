@@ -1,5 +1,7 @@
 # PaperInk Advertising Agencies
 
+[![CI](https://github.com/mokoenasiphiwe23-droid/PaperInk-advertising-agencies-/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/mokoenasiphiwe23-droid/PaperInk-advertising-agencies-/actions/workflows/test.yml)
+
 A starting point for PaperInk’s advertising-agency project.
 
 ## Overview
@@ -16,6 +18,21 @@ This repository is an initial project scaffold. It is intended to become the hom
 ├── .gitignore  # Files excluded from version control
 ├── LICENSE     # Apache License 2.0
 └── README.md   # Project overview and setup notes
+```
+
+## Core tools
+
+The initial core module in `src/agency.js` provides small, dependency-free building blocks for managing agency operations:
+
+- `createAgency()` creates an agency workspace.
+- `addClient()` adds a client with validation and duplicate protection.
+- `createCampaign()` creates a campaign for a known client.
+- `getAgencySummary()` returns client, campaign, and budget totals.
+
+Run the test suite with:
+
+```bash
+npm test
 ```
 
 ## Getting started
