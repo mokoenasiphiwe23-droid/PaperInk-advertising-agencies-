@@ -1,0 +1,13 @@
+{
+  "name": "paperink-advertising-agencies",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Initial project scaffold for PaperInk advertising agencies.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
