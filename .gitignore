@@ -1,0 +1,24 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+.idea/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+coverage/
+
+# Python cache (if Python is added later)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
