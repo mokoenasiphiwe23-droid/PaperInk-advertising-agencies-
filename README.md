@@ -28,6 +28,10 @@ The initial core module in `src/agency.js` provides small, dependency-free build
 - `addClient()` adds a client with validation and duplicate protection.
 - `createCampaign()` creates a campaign for a known client.
 - `getAgencySummary()` returns client, campaign, and budget totals.
+- `recordCampaignPerformance()` records impressions, clicks, conversions, spend, and revenue.
+- `getCampaignPerformance()` calculates CTR, conversion rate, CPA, CPC, and ROAS.
+- `exportAgencyData()` exports the workspace as JSON.
+- `exportCampaignsCsv()` exports campaign results as CSV.
 
 Run the test suite with:
 

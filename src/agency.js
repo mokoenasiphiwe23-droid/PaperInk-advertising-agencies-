@@ -85,3 +85,111 @@ export function getAgencySummary(agency) {
     }, {})
   };
 }
+
+
+export function recordCampaignPerformance(
+  agency,
+  campaignId,
+  { impressions = 0, clicks = 0, conversions = 0, spend = 0, revenue = 0 }
+) {
+  requireAgency(agency);
+  const campaign = agency.campaigns.find((candidate) => candidate.id === campaignId);
+  if (!campaign) {
+    throw new Error(`campaign not found: ${campaignId}`);
+  }
+
+  const metrics = {
+    impressions: requireNonNegativeNumber(impressions, 'impressions'),
+    clicks: requireNonNegativeNumber(clicks, 'clicks'),
+    conversions: requireNonNegativeNumber(conversions, 'conversions'),
+    spend: requireNonNegativeNumber(spend, 'spend'),
+    revenue: requireNonNegativeNumber(revenue, 'revenue')
+  };
+
+  if (metrics.clicks > metrics.impressions) {
+    throw new RangeError('clicks cannot exceed impressions');
+  }
+  if (metrics.conversions > metrics.clicks) {
+    throw new RangeError('conversions cannot exceed clicks');
+  }
+
+  campaign.performance = metrics;
+  return getCampaignPerformance(agency, campaignId);
+}
+
+export function getCampaignPerformance(agency, campaignId) {
+  requireAgency(agency);
+  const campaign = agency.campaigns.find((candidate) => candidate.id === campaignId);
+  if (!campaign) {
+    throw new Error(`campaign not found: ${campaignId}`);
+  }
+
+  const performance = campaign.performance ?? {
+    impressions: 0,
+    clicks: 0,
+    conversions: 0,
+    spend: 0,
+    revenue: 0
+  };
+  const { impressions, clicks, conversions, spend, revenue } = performance;
+
+  return {
+    campaignId: campaign.id,
+    campaignName: campaign.name,
+    ...performance,
+    clickThroughRate: impressions === 0 ? 0 : clicks / impressions,
+    conversionRate: clicks === 0 ? 0 : conversions / clicks,
+    costPerClick: clicks === 0 ? 0 : spend / clicks,
+    costPerAcquisition: conversions === 0 ? 0 : spend / conversions,
+    returnOnAdSpend: spend === 0 ? 0 : revenue / spend
+  };
+}
+
+function csvEscape(value) {
+  const text = String(value ?? '');
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+export function exportAgencyData(agency, { pretty = true } = {}) {
+  requireAgency(agency);
+  return JSON.stringify(agency, null, pretty ? 2 : 0);
+}
+
+export function exportCampaignsCsv(agency) {
+  requireAgency(agency);
+  const headers = [
+    'campaignId',
+    'campaignName',
+    'clientId',
+    'status',
+    'budget',
+    'impressions',
+    'clicks',
+    'conversions',
+    'spend',
+    'revenue',
+    'clickThroughRate',
+    'conversionRate',
+    'returnOnAdSpend'
+  ];
+  const rows = agency.campaigns.map((campaign) => {
+    const metrics = getCampaignPerformance(agency, campaign.id);
+    return [
+      campaign.id,
+      campaign.name,
+      campaign.clientId,
+      campaign.status,
+      campaign.budget,
+      metrics.impressions,
+      metrics.clicks,
+      metrics.conversions,
+      metrics.spend,
+      metrics.revenue,
+      metrics.clickThroughRate,
+      metrics.conversionRate,
+      metrics.returnOnAdSpend
+    ];
+  });
+
+  return [headers, ...rows].map((row) => row.map(csvEscape).join(',')).join('\n');
+}
