@@ -6,6 +6,7 @@ import {
   createCampaign,
   exportAgencyData,
   exportCampaignsCsv,
+  getCampaignPerformance,
   getAgencySummary,
   recordCampaignPerformance
 } from '../src/agency.js';
@@ -96,4 +97,66 @@ test('exports agency data as JSON and campaign metrics as CSV', () => {
   assert.match(csv, /campaignId,campaignName/);
   assert.match(csv, /campaign-4,Export campaign/);
   assert.match(csv, /5/);
+});
+
+test('returns zero for undefined-rate analytics without dividing by zero', () => {
+  const agency = createAgency({ name: 'PaperInk', id: 'agency-5' });
+  const client = addClient(agency, { name: 'Zero Metrics Co', id: 'client-5' });
+  const campaign = createCampaign(agency, {
+    name: 'Zero metrics campaign',
+    clientId: client.id,
+    id: 'campaign-5'
+  });
+
+  const performance = getCampaignPerformance(agency, campaign.id);
+
+  assert.equal(performance.clickThroughRate, 0);
+  assert.equal(performance.conversionRate, 0);
+  assert.equal(performance.costPerClick, 0);
+  assert.equal(performance.costPerAcquisition, 0);
+  assert.equal(performance.returnOnAdSpend, 0);
+});
+
+test('rejects impossible campaign performance metrics', () => {
+  const agency = createAgency({ name: 'PaperInk', id: 'agency-6' });
+  const client = addClient(agency, { name: 'Validation Co', id: 'client-6' });
+  const campaign = createCampaign(agency, {
+    name: 'Validation campaign',
+    clientId: client.id,
+    id: 'campaign-6'
+  });
+
+  assert.throws(
+    () => recordCampaignPerformance(agency, campaign.id, {
+      impressions: 10,
+      clicks: 11
+    }),
+    /clicks cannot exceed impressions/
+  );
+  assert.throws(
+    () => recordCampaignPerformance(agency, campaign.id, {
+      impressions: 10,
+      clicks: 5,
+      conversions: 6
+    }),
+    /conversions cannot exceed clicks/
+  );
+  assert.throws(
+    () => recordCampaignPerformance(agency, campaign.id, { spend: -1 }),
+    /spend must be a non-negative number/
+  );
+});
+
+test('escapes commas and quotes in CSV campaign exports', () => {
+  const agency = createAgency({ name: 'PaperInk', id: 'agency-7' });
+  const client = addClient(agency, { name: 'Comma, & Co', id: 'client-7' });
+  createCampaign(agency, {
+    name: 'Launch "Special"',
+    clientId: client.id,
+    id: 'campaign-7'
+  });
+
+  const csv = exportCampaignsCsv(agency);
+
+  assert.match(csv, /campaign-7,"Launch ""Special""",client-7/);
 });
